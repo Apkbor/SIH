@@ -13,6 +13,7 @@ import HudPanel from '../../components/Terminal/HudPanel';
 import StatusPill from '../../components/Terminal/StatusPill';
 import TerminalHeader from '../../components/Terminal/TerminalHeader';
 import TerminalSidebar from '../../components/Terminal/TerminalSidebar';
+import { safeDate } from '../../utils/format';
 
 const STATION_NAMES = { BHARATI: 'Bharati', MAITRI: 'Maitri' };
 
@@ -68,7 +69,7 @@ export default function NotificationsPage() {
       if (selectedStation && n.station_id !== selectedStation) return false;
       return true;
     });
-    return filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return filtered.sort((a, b) => safeDate(b.timestamp) - safeDate(a.timestamp));
   }, [socketNotifications, selectedStation]);
 
   const p0Count = notifications.filter(n => n.status === 'delivered').length;
@@ -155,7 +156,7 @@ export default function NotificationsPage() {
               notifications.map(n => {
                 const statusConf = STATUS_CONFIG[n.status] || STATUS_CONFIG.pending;
                 const channelIcon = CHANNEL_ICONS[n.channel] || '📨';
-                const isNew = Date.now() - new Date(n.timestamp).getTime() < 30000;
+                const isNew = Date.now() - safeDate(n.timestamp).getTime() < 30000;
 
                 return (
                   <div
@@ -283,7 +284,7 @@ export default function NotificationsPage() {
                           color: 'var(--term-text-dimmer)',
                           letterSpacing: '0.04em',
                         }}>
-                          {new Date(n.timestamp).toISOString().slice(0, 23).replace('T', ' ')} UTC
+                          {safeDate(n.timestamp).toISOString().slice(0, 23).replace('T', ' ')} UTC
                           {' · '}
                           {STATION_NAMES[n.station_id] || n.station_id}
                           {' · '}

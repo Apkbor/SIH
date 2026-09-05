@@ -27,6 +27,7 @@ import StatusPill from '../../components/Terminal/StatusPill';
 import TerminalSidebar from '../../components/Terminal/TerminalSidebar';
 import TerminalHeader from '../../components/Terminal/TerminalHeader';
 import HudPanel from '../../components/Terminal/HudPanel';
+import { safeDate } from '../../utils/format';
 
 const STATION_NAMES = { BHARATI: 'Bharati', MAITRI: 'Maitri' };
 const STATION_COLORS = {
@@ -186,7 +187,7 @@ export default function BasePage() {
         return false;
       });
     }
-    return msgs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    return msgs.sort((a, b) => safeDate(a.timestamp) - safeDate(b.timestamp));
   }, [allMessages, stationFilter, activeChannels]);
 
   // ─── Derived: filtered alerts ───
@@ -207,7 +208,7 @@ export default function BasePage() {
     if (stationFilter !== 'BOTH') {
       list = list.filter(n => n.station_id === stationFilter);
     }
-    return list.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return list.sort((a, b) => safeDate(b.timestamp) - safeDate(a.timestamp));
   }, [allNotifications, stationFilter]);
 
   // ─── Derived: station status cards ───
@@ -241,7 +242,7 @@ export default function BasePage() {
         batteryPct: e ? Math.round(e.batteryPercent) : null,
         activeAlertCount: unc.filter(a => !a.resolved).length,
         criticalAlertCount: unc.filter(a => !a.resolved && a.priority === 'P0').length,
-        lastMessage: lastMsg ? new Date(lastMsg) : null,
+        lastMessage: lastMsg ? safeDate(lastMsg) : null,
         unreadCount: msgs.length,
         tempC: liveData?.[`${sid}:environment`]?.temperatureC,
         windKmh: liveData?.[`${sid}:environment`]?.windSpeedKmh,
@@ -338,16 +339,16 @@ export default function BasePage() {
   // ─── Format timestamp ───
   const fmtTime = (ts) => {
     if (!ts) return '--:--:--';
-    const d = new Date(ts);
+    const d = safeDate(ts);
     return d.toISOString().slice(11, 19);
   };
   const fmtRelative = (ts) => {
     if (!ts) return 'never';
-    const diff = Date.now() - new Date(ts).getTime();
+    const diff = Date.now() - safeDate(ts).getTime();
     if (diff < 60000) return 'just now';
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-    return new Date(ts).toISOString().slice(5, 10);
+    return safeDate(ts).toISOString().slice(5, 10);
   };
 
   // ─── Determine station for a message ───
@@ -1126,7 +1127,7 @@ export default function BasePage() {
                   P2: { color: 'var(--term-text-dim)', bg: 'var(--term-bg-inset)', border: 'var(--term-border)' },
                 };
                 const pc = pColors[alert.priority] || pColors.P2;
-                const isNewAlert = Date.now() - new Date(alert.timestamp).getTime() < 10000;
+                const isNewAlert = Date.now() - safeDate(alert.timestamp).getTime() < 10000;
 
                 return (
                   <div
@@ -1191,7 +1192,7 @@ export default function BasePage() {
                       {!alert.acknowledged && !alert.resolved && (
                         <button
                           onClick={() => handleAcknowledgeEmergency(
-                            allMessages.find(m => m.station_id === alert.stationId && m.channel === 'emergency' && new Date(m.timestamp) > new Date(alert.timestamp) - 10000)?.id
+                            allMessages.find(m => m.station_id === alert.stationId && m.channel === 'emergency' && safeDate(m.timestamp) > safeDate(alert.timestamp) - 10000)?.id
                           )}
                           style={{
                             marginLeft: '6px',

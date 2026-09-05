@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS alerts (
   threshold       TEXT,
   acknowledged    INTEGER DEFAULT 0,
   resolved        INTEGER DEFAULT 0,
-  timestamp       TEXT DEFAULT (datetime('now')),
+  timestamp       TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%S', 'now')),
   FOREIGN KEY (station_id) REFERENCES stations(id)
 );
 

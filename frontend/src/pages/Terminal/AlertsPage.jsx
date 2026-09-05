@@ -10,6 +10,7 @@ import HudPanel from '../../components/Terminal/HudPanel';
 import StatusPill from '../../components/Terminal/StatusPill';
 import TerminalHeader from '../../components/Terminal/TerminalHeader';
 import TerminalSidebar from '../../components/Terminal/TerminalSidebar';
+import { safeDate } from '../../utils/format';
 
 const PRIORITIES = ['ALL', 'P0', 'P1', 'P2'];
 const STATUS_FILTERS = [
@@ -403,7 +404,7 @@ export default function AlertsPage() {
                         color: 'var(--term-text-dimmer)',
                         letterSpacing: '0.04em',
                       }}>
-                        {new Date(alert.timestamp).toISOString().slice(11, 23)} UTC
+                        {safeDate(alert.timestamp).toISOString().slice(11, 23)} UTC
                         {alert.value && <span> · VAL: {alert.value}</span>}
                         {alert.threshold && <span> · THR: {alert.threshold}</span>}
                       </div>

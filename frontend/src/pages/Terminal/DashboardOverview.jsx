@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import { getBuildings, getInventory, getReadings } from '../../services/api';
 import HudPanel from '../../components/Terminal/HudPanel';
+import { safeDate } from '../../utils/format';
 import RingGauge from '../../components/Terminal/RingGauge';
 import Sparkline from '../../components/Terminal/Sparkline';
 import StatusPill from '../../components/Terminal/StatusPill';
@@ -340,7 +341,7 @@ export default function DashboardOverview() {
                 letterSpacing: '0.06em',
                 color: 'var(--term-text-dimmer)',
               }}>
-                INDIA · ANTARCTICA · {energy.timestamp ? new Date(energy.timestamp).toISOString().slice(0,10) : '—'}
+                INDIA · ANTARCTICA · {energy.timestamp ? safeDate(energy.timestamp).toISOString().slice(0,10) : '—'}
               </span>
             </div>
             <div style={{ display: 'flex', gap: '6px' }}>

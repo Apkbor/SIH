@@ -24,6 +24,7 @@ import HudPanel from '../../components/Terminal/HudPanel';
 import StatusPill from '../../components/Terminal/StatusPill';
 import TerminalHeader from '../../components/Terminal/TerminalHeader';
 import TerminalSidebar from '../../components/Terminal/TerminalSidebar';
+import { safeDate } from '../../utils/format';
 
 const CHAT_SENDER = 'OPERATOR'; // Current user identity
 const PAGE_SIZE = 100;
@@ -103,7 +104,7 @@ export default function ChatPage() {
       if (m.channel === activeChannel) map.set(m.id, m);
     }
     return Array.from(map.values()).sort((a, b) =>
-      new Date(a.timestamp) - new Date(b.timestamp)
+      safeDate(a.timestamp) - safeDate(b.timestamp)
     );
   }, [history, socketMessages, activeChannel]);
 
@@ -383,7 +384,7 @@ export default function ChatPage() {
                     const isSelf = msg.sender === CHAT_SENDER;
                     const isBot = msg.sender === 'NCPOR-Ops-Bot';
                     const isSystem = msg.msg_type === 'system';
-                    const time = msg.timestamp ? new Date(msg.timestamp) : new Date();
+                    const time = msg.timestamp ? safeDate(msg.timestamp) : new Date();
                     const ts = time.toISOString().slice(11, 19);
 
                     if (isSystem) {
