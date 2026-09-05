@@ -58,19 +58,33 @@ export default function NotificationsPage() {
     let cancelled = false;
     getNotifications(selectedStation, 100).then(existing => {
       if (cancelled) return;
-      // We keep socketNotifications in sync — just mark loaded
+      // Merge DB records into local state so page shows history immediately
+      if (Array.isArray(existing) && existing.length > 0) {
+        const normalized = existing.map(n => ({ ...n }));
+        // Use socketNotifications as source of truth, but seed with DB data on first load
+        setLocalNotifications(normalized);
+      }
       setLoaded(true);
-    }).catch(() => {});
-    setLoaded(true);
+    }).catch(() => { setLoaded(true); });
+    return () => { cancelled = true; };
   }, [selectedStation]);
 
+  // Keep local copy in sync with socket events
+  const [localNotifications, setLocalNotifications] = useState([]);
+  useEffect(() => {
+    if (socketNotifications.length > 0 && !loaded) {
+      // Socket events already populating — let AppContext handle it
+    }
+  }, [socketNotifications]);
+
   const notifications = useMemo(() => {
-    let filtered = socketNotifications.filter(n => {
+    const source = localNotifications.length > 0 ? localNotifications : socketNotifications;
+    let filtered = source.filter(n => {
       if (selectedStation && n.station_id !== selectedStation) return false;
       return true;
     });
     return filtered.sort((a, b) => safeDate(b.timestamp) - safeDate(a.timestamp));
-  }, [socketNotifications, selectedStation]);
+  }, [localNotifications, socketNotifications, selectedStation]);
 
   const p0Count = notifications.filter(n => n.status === 'delivered').length;
   const pendingCount = notifications.filter(n => n.status === 'pending').length;

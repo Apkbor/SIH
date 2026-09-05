@@ -101,12 +101,13 @@ export default function AlertsPage() {
   const p1Count = stationAlerts.filter(a => a.priority === 'P1' && !a.resolved).length;
   const p2Count = stationAlerts.filter(a => a.priority === 'P2' && !a.resolved).length;
 
-  // Resolve notification authorities for P0 alerts
-  const p0Notified = useMemo(() => {
+  // Resolve notification authorities for P0/P1/P2 alerts
+  const notifiedAuthorities = useMemo(() => {
     const map = new Map();
     for (const n of notifications) {
-      if (n.priority === 'P0' || !n.alert_id) continue;
-      map.set(n.alert_id, n.authority);
+      if (n.alert_id) {
+        map.set(n.alert_id, n.authority);
+      }
     }
     return map;
   }, [notifications]);
@@ -352,21 +353,33 @@ export default function AlertsPage() {
                         </span>
 
                         {/* Feature 1 — notification badge for all priorities */}
-                        {(alert.priority === 'P0' || alert.priority === 'P1' || alert.priority === 'P2') && (
-                          <span style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: '8px',
-                            fontWeight: 600,
-                            letterSpacing: '0.06em',
-                            padding: '1px 6px',
-                            background: alert.priority === 'P0' ? 'var(--term-red-bg)' : alert.priority === 'P1' ? 'var(--term-amber-bg)' : 'var(--term-cyan-bg)',
-                            color: alert.priority === 'P0' ? 'var(--term-red)' : alert.priority === 'P1' ? 'var(--term-amber)' : 'var(--term-cyan)',
-                            border: `1px solid ${alert.priority === 'P0' ? 'var(--term-red-border)' : alert.priority === 'P1' ? 'var(--term-amber-border)' : 'var(--term-cyan-dim)'}`,
-                            borderRadius: '2px',
-                          }}>
-                            📱 SMS → {alert.priority === 'P0' ? 'Critical Response Team' : alert.priority === 'P1' ? 'Operations Team' : 'Routine Monitoring Team'}
-                          </span>
-                        )}
+                        {(alert.priority === 'P0' || alert.priority === 'P1' || alert.priority === 'P2') && (() => {
+                          const authority = notifiedAuthorities.get(alert.id);
+                          const badgeConfig = {
+                            P0: { bg: 'var(--term-red-bg)', color: 'var(--term-red)', border: 'var(--term-red-border)', label: '🔴 NOTIFIED' },
+                            P1: { bg: 'var(--term-amber-bg)', color: 'var(--term-amber)', border: 'var(--term-amber-border)', label: '📋 NOTIFIED' },
+                            P2: { bg: 'var(--term-cyan-bg)', color: 'var(--term-cyan)', border: 'var(--term-cyan-dim)', label: '📨 QUEUED' },
+                          };
+                          const cfg = badgeConfig[alert.priority] || badgeConfig.P2;
+                          return (
+                            <span style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: '8px',
+                              fontWeight: 600,
+                              letterSpacing: '0.06em',
+                              padding: '1px 6px',
+                              background: cfg.bg,
+                              color: cfg.color,
+                              border: `1px solid ${cfg.border}`,
+                              borderRadius: '2px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}>
+                              {cfg.label} {authority || ''}
+                            </span>
+                          );
+                        })()}
                         {!alert.acknowledged && (
                           <span style={{
                             fontFamily: 'var(--font-mono)',

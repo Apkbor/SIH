@@ -4,6 +4,8 @@ const NAV_ITEMS = [
   { path: '/', label: 'Dashboard', short: 'HOME' },
   { path: '/monitoring', label: 'Monitoring', short: 'MON' },
   { path: '/alerts', label: 'Alerts', short: 'ALERTS' },
+  { path: '/notifications', label: 'Notifications', short: 'DISPATCH' },
+  { path: '/chat', label: 'Comms Hub', short: 'COMMS' },
   { path: '/forecasts', label: 'Forecasts', short: 'AI' },
   { path: '/simulator', label: 'Simulator', short: 'SIM' },
   { path: '/compare', label: 'Compare', short: 'CMP' },

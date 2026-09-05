@@ -570,22 +570,25 @@ server.listen(PORT, async () => {
   // Register all-priority alert handler — dedup-aware dispatch + chat integration
   onAlert(async (alert) => {
     try {
-      // Dedup-aware SMS dispatch (works for P0/P1/P2)
-      const { checkAndDispatch } = await import('./services/activeNotifications.js');
-      const result = await checkAndDispatch(alert);
+      // ---- FEATURE 1: Auto-dispatch notification to authority ----
+      // dispatchNotification writes to DB + emits 'notification:new' via Socket.io
+      const { dispatchNotification } = await import('./notifications/dispatcher.js');
+      const notificationRecord = await dispatchNotification(alert);
 
-      // Log dispatch result for debugging
-      if (result.action === 'sent') {
-        console.log(`[ALERT→SMS] ${alert.priority} SMS dispatched for ${result.signature}`);
-      } else if (result.action === 'suppressed') {
-        console.log(`[ALERT→SMS] Duplicate suppressed: ${result.signature} (#${result.occurrenceCount} occurrences)`);
-      } else if (result.action === 'escalated') {
-        console.log(`[ALERT→SMS] Escalation SMS sent for ${result.signature} (active ${result.duration}min)`);
-      } else if (result.action === 'resolved') {
-        console.log(`[ALERT→SMS] Resolved: ${result.signature} (was active ${result.duration}min)`);
+      // ---- SMS dedup (legacy flow, logs result) ----
+      const { checkAndDispatch } = await import('./services/activeNotifications.js');
+      const smsResult = await checkAndDispatch(alert);
+      if (smsResult.action === 'sent') {
+        console.log(`[ALERT→SMS] ${alert.priority} SMS dispatched for ${smsResult.signature}`);
+      } else if (smsResult.action === 'suppressed') {
+        console.log(`[ALERT→SMS] Duplicate suppressed: ${smsResult.signature} (#${smsResult.occurrenceCount} occurrences)`);
+      } else if (smsResult.action === 'escalated') {
+        console.log(`[ALERT→SMS] Escalation SMS sent for ${smsResult.signature} (active ${smsResult.duration}min)`);
+      } else if (smsResult.action === 'resolved') {
+        console.log(`[ALERT→SMS] Resolved: ${smsResult.signature} (was active ${smsResult.duration}min)`);
       }
 
-      // Post system message to relevant chat channel (ties alerts + chat together)
+      // ---- FEATURE 2: Post system message to chat ----
       const channelMap = {
         energy: 'ops-bharati',
         fuel: 'ops-bharati',
@@ -599,10 +602,8 @@ server.listen(PORT, async () => {
       const stationName = stationNames[alert.stationId] || alert.stationId;
 
       let chatContent;
-      if (result.action === 'sent') {
-        chatContent = `P0 ALERT DISPATCHED: ${alert.title} — ${stationName}. Authority notified via automated dispatch. Ref: ${alert.id}`;
-      } else if (result.action === 'escalated') {
-        chatContent = `ESCALATION: Alert ongoing ${result.duration}min — ${alert.title} — ${stationName}. Follow-up SMS dispatched. Ref: ${alert.id}`;
+      if (smsResult.action === 'sent' || smsResult.action === 'escalated') {
+        chatContent = `${alert.priority} ALERT: ${alert.title} — ${stationName}. Authority notified: ${notificationRecord?.authority || 'N/A'}. Ref: ${alert.id}`;
       } else {
         // Suppressed or resolved — log quietly but don't spam chat
         return;
