@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AntarctiGrid — NCPOR Mission Control Terminal v2.0</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: 'Inter', sans-serif; background: #0A1628; color: #E8F4F8; overflow: hidden; }
+      #root { width: 100vw; height: 100vh; }
+      ::-webkit-scrollbar { width: 4px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(125,219,238,0.15); border-radius: 2px; }
+      ::-webkit-scrollbar-thumb:hover { background: rgba(125,219,238,0.3); }
+      @keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100vh); } }
+      @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes glow { 0%,100% { box-shadow: 0 0 4px rgba(79,209,232,0.3); } 50% { box-shadow: 0 0 12px rgba(79,209,232,0.6); } }
+      @keyframes borderGlow { 0%,100% { border-color: rgba(79,209,232,0.15); } 50% { border-color: rgba(79,209,232,0.4); } }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

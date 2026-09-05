@@ -1,0 +1,13 @@
+{
+  "name": "antartica-platform",
+  "version": "1.0.0",
+  "description": "AI-Powered Digital Twin Platform for Indian Antarctic Research Stations — SIH 2026",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build"
+  },
+  "keywords": ["SIH-2026", "antarctica", "digital-twin", "NCPOR"],
+  "license": "MIT"
+}
