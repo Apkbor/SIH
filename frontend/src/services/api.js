@@ -28,10 +28,12 @@ export async function getInventory(stationId) {
   return res.json();
 }
 
-export async function getAlerts(stationId) {
-  const params = new URLSearchParams({ unresolved: 'true' });
+export async function getAlerts(stationId, unresolvedOnly = false) {
+  const params = new URLSearchParams();
   if (stationId) params.set('stationId', stationId);
-  const res = await fetch(`${API_BASE}/alerts?${params}`);
+  if (unresolvedOnly) params.set('unresolved', 'true');
+  const query = params.toString();
+  const res = await fetch(`${API_BASE}/alerts${query ? '?' + query : ''}`);
   return res.json();
 }
 

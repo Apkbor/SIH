@@ -84,7 +84,8 @@ io.on('connection', (socket) => {
   // Allow frontend to seed alerts from DB on connect
   socket.on('alerts:seed', (existingAlerts) => {
     existingAlerts.forEach(alert => {
-      io.to(`alerts:${alert.station_id}`).emit('alert', alert);
+      const sid = alert.station_id || alert.stationId;
+      if (sid) io.to(`alerts:${sid}`).emit('alert', alert);
     });
   });
 
@@ -303,23 +304,29 @@ app.get('/api/chat/messages', (req, res) => {
 });
 
 // POST chat message
-app.post('/api/chat/message', (req, res) => {
-  const { channel, sender, content, msg_type = 'user', station_id } = req.body;
-  if (!channel || !sender || !content) {
-    return res.status(400).json({ error: 'channel, sender, content required' });
+app.post('/api/chat/message', async (req, res) => {
+  try {
+    const { channel, sender, content, msg_type = 'user', station_id } = req.body;
+    if (!channel || !sender || !content) {
+      return res.status(400).json({ error: 'channel, sender, content required' });
+    }
+    const { saveMessage } = await import('./chat/index.js');
+    const msg = saveMessage(channel, sender, content, msg_type, station_id);
+    res.json(msg);
+  } catch (err) {
+    console.error('[CHAT] Failed to save message:', err);
+    res.status(500).json({ error: err.message });
   }
-  const msg = saveMessage(channel, sender, content, msg_type, station_id);
-  res.json(msg);
 });
 
 // POST broadcast message to all channels
-app.post('/api/chat/broadcast', (req, res) => {
+app.post('/api/chat/broadcast', async (req, res) => {
   try {
     const { sender, content, msg_type = 'user', station_id } = req.body;
     if (!sender || !content) {
       return res.status(400).json({ error: 'sender, content required' });
     }
-    const { broadcastMessage } = require('./chat/index.js');
+    const { broadcastMessage } = await import('./chat/index.js');
     const results = broadcastMessage(sender, content, msg_type, station_id);
     res.json({ sent: results.length, messages: results });
   } catch (err) {

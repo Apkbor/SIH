@@ -31,9 +31,13 @@ export function AppProvider({ children }) {
       fetch('/api/alerts?unresolved=true&limit=100')
         .then(r => r.json())
         .then(existing => {
+          const normalized = existing.map(a => ({
+            ...a,
+            stationId: a.station_id || a.stationId,
+          }));
           setAlerts(prev => {
             const map = new Map();
-            [...existing, ...prev].forEach(a => map.set(a.id, a));
+            [...normalized, ...prev].forEach(a => map.set(a.id, a));
             return Array.from(map.values()).slice(0, 200);
           });
         })

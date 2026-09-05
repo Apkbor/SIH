@@ -135,15 +135,18 @@ export default function BasePage() {
   // ─── Listen for live alerts ───
   useEffect(() => {
     if (!socket) return;
-    const handlers = [
-      socket.on('alert', (alert) => {
-        setAllAlerts(prev => [alert, ...prev].slice(0, 200));
-      }),
-      socket.on('alert:updated', (alert) => {
-        setAllAlerts(prev => prev.map(a => a.id === alert.id ? alert : a));
-      }),
-    ];
-    return () => handlers.forEach(fn => fn());
+    const onAlert = (alert) => {
+      setAllAlerts(prev => [alert, ...prev].slice(0, 200));
+    };
+    const onAlertUpdated = (alert) => {
+      setAllAlerts(prev => prev.map(a => a.id === alert.id ? alert : a));
+    };
+    socket.on('alert', onAlert);
+    socket.on('alert:updated', onAlertUpdated);
+    return () => {
+      socket.off('alert', onAlert);
+      socket.off('alert:updated', onAlertUpdated);
+    };
   }, [socket]);
 
   // ─── Listen for live notifications ───

@@ -52,10 +52,15 @@ export default function AlertsPage() {
   // On mount, fetch existing alerts from DB so the page isn't empty
   useEffect(() => {
     let cancelled = false;
-    getAlerts(selectedStation).then(existing => {
+    getAlerts(selectedStation, false).then(existing => {
       if (cancelled || !existing?.length) return;
+      // Normalize DB field names (sql.js returns snake_case columns)
+      const normalized = existing.map(a => ({
+        ...a,
+        stationId: a.station_id || a.stationId,
+      }));
       // Merge into app context without duplicates
-      socket?.emit('alerts:seed', existing);
+      socket?.emit('alerts:seed', normalized);
     }).catch(() => {});
     setInitialLoadDone(true);
     return () => { cancelled = true; };
