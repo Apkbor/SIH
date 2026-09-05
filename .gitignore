@@ -25,6 +25,9 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-# Misc
+# Ignore all databases except the shared schema file
+backend/data/platform.db
 *.db
 *.sqlite
+*.db-shm
+*.db-wal

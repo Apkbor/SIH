@@ -336,10 +336,10 @@ app.post('/api/chat/broadcast', async (req, res) => {
 });
 
 // GET recent messages across all channels
-app.get('/api/chat/all', (req, res) => {
+app.get('/api/chat/all', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit || '200', 10);
-    const { getAllMessages } = require('./chat/index.js');
+    const { getAllMessages } = await import('./chat/index.js');
     res.json(getAllMessages(limit));
   } catch (err) {
     console.error('[CHAT] getAllMessages failed:', err.message);
