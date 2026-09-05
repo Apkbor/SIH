@@ -72,9 +72,14 @@ export default function NotificationsPage() {
   // Keep local copy in sync with socket events
   const [localNotifications, setLocalNotifications] = useState([]);
   useEffect(() => {
-    if (socketNotifications.length > 0 && !loaded) {
-      // Socket events already populating — let AppContext handle it
-    }
+    if (!socketNotifications.length) return;
+    setLocalNotifications(prev => {
+      // Merge incoming socket notifications without duplicates
+      const existingIds = new Set(prev.map(n => n.id));
+      const newOnes = socketNotifications.filter(n => !existingIds.has(n.id));
+      if (newOnes.length === 0) return prev;
+      return [...prev, ...newOnes];
+    });
   }, [socketNotifications]);
 
   const notifications = useMemo(() => {

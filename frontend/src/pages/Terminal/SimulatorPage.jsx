@@ -2,7 +2,7 @@
  * SimulatorPage — What-If Simulator (Terminal Edition)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import { simulateGeneratorFailure, simulateFuelDisruption } from '../../services/api';
@@ -149,44 +149,69 @@ export default function SimulatorPage() {
                 </button>
               ))}
             </div>
-            <div style={{ marginTop: '8px', display: 'flex', gap: '6px' }}>
-              <button
-                onClick={handleRun}
-                disabled={!selectedScenario || loading}
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                  padding: '6px 16px',
-                  background: selectedScenario && !loading ? 'var(--term-green-08)' : 'var(--term-bg-inset)',
-                  color: selectedScenario && !loading ? 'var(--term-green)' : 'var(--term-text-dimmer)',
-                  border: `1px solid ${selectedScenario && !loading ? 'var(--term-border-bright)' : 'var(--term-border)'}`,
-                  borderRadius: '2px',
-                  cursor: selectedScenario && !loading ? 'pointer' : 'not-allowed',
-                }}
-              >
-                {loading ? 'COMPUTING...' : '[ RUN SIMULATION ]'}
-              </button>
-              <button
-                onClick={handleBackupOverride}
-                disabled={overrideCooldown}
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                  padding: '6px 16px',
-                  background: 'var(--term-amber-bg)',
-                  color: overrideCooldown ? 'var(--term-text-dimmer)' : 'var(--term-amber)',
-                  border: '1px solid var(--term-amber-border)',
-                  borderRadius: '2px',
-                  cursor: overrideCooldown ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {overrideCooldown ? 'COOLDOWN...' : '[ BACKUP GEN OVERRIDE ]'}
-              </button>
-            </div>
+              <div style={{ marginTop: '8px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleRun}
+                  disabled={!selectedScenario || loading}
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    letterSpacing: '0.08em',
+                    padding: '6px 16px',
+                    background: selectedScenario && !loading ? 'var(--term-green-08)' : 'var(--term-bg-inset)',
+                    color: selectedScenario && !loading ? 'var(--term-green)' : 'var(--term-text-dimmer)',
+                    border: `1px solid ${selectedScenario && !loading ? 'var(--term-border-bright)' : 'var(--term-border)'}`,
+                    borderRadius: '2px',
+                    cursor: selectedScenario && !loading ? 'pointer' : 'not-allowed',
+                  }}
+                >
+                  {loading ? 'COMPUTING...' : '[ RUN SIMULATION ]'}
+                </button>
+
+                <button
+                  onClick={handleBackupOverride}
+                  disabled={overrideCooldown}
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    letterSpacing: '0.08em',
+                    padding: '6px 16px',
+                    background: 'var(--term-amber-bg)',
+                    color: overrideCooldown ? 'var(--term-text-dimmer)' : 'var(--term-amber)',
+                    border: '1px solid var(--term-amber-border)',
+                    borderRadius: '2px',
+                    cursor: overrideCooldown ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {overrideCooldown ? 'COOLDOWN...' : '[ BACKUP GEN OVERRIDE ]'}
+                </button>
+
+                {/* Feature 1 demo: inject critical alert to trigger notification + chat */}
+                <button
+                  onClick={() => {
+                    // Inject anomaly → triggers P0 alert → auto-dispatches notification + chat system message
+                    send('simulator:inject-anomaly', { stationId: selectedStation, type: 'generator_overheat' });
+                  }}
+                  disabled={false}
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    letterSpacing: '0.08em',
+                    padding: '6px 16px',
+                    background: 'var(--term-red-bg)',
+                    color: 'var(--term-red)',
+                    border: '1px solid var(--term-red-border)',
+                    borderRadius: '2px',
+                    cursor: 'pointer',
+                    animation: 'termPulse 2s ease-in-out infinite',
+                  }}
+                >
+                  ⚠ [ INJECT CRITICAL ]
+                </button>
+              </div>
           </HudPanel>
 
           {/* Simulation result */}

@@ -352,13 +352,11 @@ export default function AlertsPage() {
                           {alert.category?.toUpperCase()}
                         </span>
 
-                        {/* Feature 1 — notification badge for all priorities */}
-                        {(alert.priority === 'P0' || alert.priority === 'P1' || alert.priority === 'P2') && (() => {
+                        {/* Feature 1 — notification badge for critical (P0) alerts */}
+                        {alert.priority === 'P0' && (() => {
                           const authority = notifiedAuthorities.get(alert.id);
                           const badgeConfig = {
-                            P0: { bg: 'var(--term-red-bg)', color: 'var(--term-red)', border: 'var(--term-red-border)', label: '🔴 NOTIFIED' },
-                            P1: { bg: 'var(--term-amber-bg)', color: 'var(--term-amber)', border: 'var(--term-amber-border)', label: '📋 NOTIFIED' },
-                            P2: { bg: 'var(--term-cyan-bg)', color: 'var(--term-cyan)', border: 'var(--term-cyan-dim)', label: '📨 QUEUED' },
+                            P0: { bg: 'var(--term-red-bg)', color: 'var(--term-red)', border: 'var(--term-red-border)', label: 'NOTIFIED' },
                           };
                           const cfg = badgeConfig[alert.priority] || badgeConfig.P2;
                           return (
